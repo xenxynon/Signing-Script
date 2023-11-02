@@ -10,7 +10,7 @@ On root directory of your rom, run:
 After Generating the keys, instead of running brunch , run the following: 
 
     lunch <codename>
-    mka target-files-package otatools
+    m target-files-package otatools
 
 
 # Signing target files
