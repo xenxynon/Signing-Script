@@ -33,13 +33,24 @@ function print_section() {
 
 function execute_build_signing() {
     local certs_dir=$1
-    print_section "Executing Build Signing Script"
-    echo "Running build signing script with certificate directory: $certs_dir"
-    ./sign_build.sh "$certs_dir"
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Build signing completed successfully.${NC}"
+    echo -e "${YELLOW}Do you want to run the build signing script now? (yes/no): ${NC}"
+    read -r response
+    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase
+
+    if [[ "$response" =~ ^(yes|y|yep|sure|yeah|yup|ok|okay)$ ]]; then
+        print_section "Executing Build Signing Script"
+        echo "Running build signing script with certificate directory: $certs_dir"
+        ./sign_build.sh "$certs_dir"
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}Build signing completed successfully.${NC}"
+        else
+            echo -e "${RED}Build signing failed.${NC}"
+        fi
+    elif [[ "$response" =~ ^(no|n|nope|nah|naw)$ ]]; then
+        echo -e "${YELLOW}Skipping build signing as per user request.${NC}"
     else
-        echo -e "${RED}Build signing failed.${NC}"
+        echo -e "${RED}Invalid response. Exiting.${NC}"
+        exit 1
     fi
 }
 
