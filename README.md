@@ -17,32 +17,34 @@
     m target-files-package otatools
     ```
 
-## Signing Target Files
+### [OG METHOD] Signing Target Files
 
-3. After the previous step, sign all the APKs with:
-    ```bash
+**After the previous step, sign all the APKs with**
+
+    
     croot 
     sign_target_files_apks -o -d ~/.android-certs \
         $OUT/obj/PACKAGING/target_files_intermediates/*-target_files-*.zip \
         signed-target_files.zip
-    ```
+    
 
 ## APEX Signing
 
-4. For APEX signing, use the following command to automatically sign all APKs:
-    ```bash
-    find $OUT/obj/APPS -name '*.apk' -exec \
-        sign_target_files_apks -o -d ~/.android-certs \
-        --extra_apks {}=$HOME/.android-certs/releasekey \;
-    ```
+3. For APEX payload signing, use the following command to automatically sign all APKs:
+ ```
+    find $OUT/obj/APPS \( -name '*.apk' -o -name '*.apex' \) -exec \
+    sign_target_files_apks -o -d ~/.android-certs \
+    --extra_apks {}=$HOME/.android-certs/releasekey \; \
+$OUT/obj/PACKAGING/target_files_intermediates/*-target_files*.zip \
+signed-target_files.zip
+```
+4. To generate recovery installable zip, execute:
 
-**[OG METHOD] To generate recovery installable zip, execute:**
-
-
+```
     ota_from_target_files -k ~/.android-certs/releasekey \
         signed-target_files.zip \
         signed-ota_update.zip
-
+```
 
 ## References
 - partly kanged from [AOSP-Krypton vendor](https://github.com/AOSP-Krypton/vendor_kosp/blob/A12/envsetup.sh#L432-L448)
