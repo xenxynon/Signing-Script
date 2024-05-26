@@ -13,25 +13,27 @@ negative_responses="no|n|nope|nah|naw"
 
 function print_header() {
     echo -e "${CYAN}"
-    echo "========================================"
-    echo "         ANDROID KEY GENERATOR          "
-    echo "========================================"
+    echo "------------------------------------------"
+    echo "         ANDROID KEY GENERATOR            "
+    echo "------------------------------------------"
     echo -e "${NC}"
 }
 
 function print_footer() {
     echo -e "${CYAN}"
-    echo "========================================"
-    echo "      KEY GENERATION COMPLETED!         "
-    echo "========================================"
+    echo "------------------------------------------"
+    echo "       KEY GENERATION COMPLETED!         "
+    echo "       Welcome to the circus!             "
+    echo "------------------------------------------"
     echo -e "${NC}${GREEN}Certificates are stored in: $1${NC}"
 }
 
 function print_section() {
     echo -e "${YELLOW}"
-    echo "----------------------------------------"
-    echo "$1"
-    echo "----------------------------------------"
+    echo "------------------------------------------"
+    echo "|               $1                        |"
+    echo "|        Generating APEX Keys             |"
+    echo "------------------------------------------"
     echo -e "${NC}"
 }
 
