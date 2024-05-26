@@ -1,33 +1,95 @@
 #!/bin/bash
 
+# Define colors
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+function print_header() {
+    echo -e "${CYAN}"
+    echo "========================================"
+    echo "         ANDROID KEY GENERATOR          "
+    echo "========================================"
+    echo -e "${NC}"
+}
+
+function print_footer() {
+    echo -e "${CYAN}"
+    echo "========================================"
+    echo "      KEY GENERATION COMPLETED!         "
+    echo "========================================"
+    echo -e "${NC}${GREEN}Certificates are stored in: $1${NC}"
+}
+
+function print_section() {
+    echo -e "${YELLOW}"
+    echo "----------------------------------------"
+    echo "$1"
+    echo "----------------------------------------"
+    echo -e "${NC}"
+}
+
 function keygen() {
-    local certs_dir=~/.android-certs
-    [ -z "$1" ] || certs_dir=$1
+    local default_certs_dir=~/.android-certs
+    local certs_dir=${1:-$default_certs_dir}
+
+    print_header
+
+    # Clean and create certificate directory
+    print_section "Setting Up Certificate Directory"
     rm -rf "$certs_dir"
     mkdir -p "$certs_dir"
+    echo "Directory setup at: $certs_dir"
+    echo
 
     local subject=""
     echo "Sample subject: '/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=Android/emailAddress=android@android.com'"
     echo "Now enter subject details for your keys:"
+    echo "----------------------------------------"
+
+    # Read subject details from user input
     for entry in C ST L O OU CN emailAddress; do
-        echo -n "$entry: "
-        read -r val
-        subject+="/$entry=$val"
+        while true; do
+            echo -n "$entry: "
+            read -r val
+            if [ -n "$val" ]; then
+                subject+="/$entry=$val"
+                break
+            else
+                echo "Value for $entry cannot be empty. Please try again."
+            fi
+        done
     done
+    echo "----------------------------------------"
+    echo "Subject details: $subject"
+    echo
 
     # Generate keys for standard certificates
-    for key in bluetooth certs cyngn-app media networkstack platform releasekey sdk_sandbox shared testcert testkey verity; do
+    print_section "Generating Standard Keys"
+    local standard_keys=("bluetooth" "certs" "cyngn-app" "media" "networkstack" "platform" "releasekey" "sdk_sandbox" "shared" "testcert" "testkey" "verity")
+    for key in "${standard_keys[@]}"; do
+        echo "Generating key: $key"
         ./development/tools/make_key "$certs_dir/$key" "$subject"
     done
 
     # Modify make_key script to use 4096 bits instead of 2048 bits
+    echo "Updating key length to 4096 bits..."
     sed -i 's|2048|4096|g' ./development/tools/make_key
 
     # Generate keys for APEX modules
-    for apex in com.android.adbd com.android.adservices com.android.adservices.api com.android.appsearch com.android.art com.android.bluetooth com.android.btservices com.android.cellbroadcast com.android.compos com.android.configinfrastructure com.android.connectivity.resources com.android.conscrypt com.android.devicelock com.android.extservices com.android.graphics.pdf com.android.hardware.biometrics.face.virtual com.android.hardware.biometrics.fingerprint.virtual com.android.hardware.boot com.android.hardware.cas com.android.hardware.wifi com.android.healthfitness com.android.hotspot2.osulogin com.android.i18n com.android.ipsec com.android.media com.android.media.swcodec com.android.mediaprovider com.android.nearby.halfsheet com.android.networkstack.tethering com.android.neuralnetworks com.android.ondevicepersonalization com.android.os.statsd com.android.permission com.android.resolv com.android.rkpd com.android.runtime com.android.safetycenter.resources com.android.scheduling com.android.sdkext com.android.support.apexer com.android.telephony com.android.telephonymodules com.android.tethering com.android.tzdata com.android.uwb com.android.uwb.resources com.android.virt com.android.vndk.current com.android.vndk.current.on_vendor com.android.wifi com.android.wifi.dialog com.android.wifi.resources com.google.pixel.camera.hal com.google.pixel.vibrator.hal com.qorvo.uwb; do
+    print_section "Generating APEX Keys"
+    local apex_modules=("com.android.adbd" "com.android.adservices" "com.android.adservices.api" "com.android.appsearch" "com.android.art" "com.android.bluetooth" "com.android.btservices" "com.android.cellbroadcast" "com.android.compos" "com.android.configinfrastructure" "com.android.connectivity.resources" "com.android.conscrypt" "com.android.devicelock" "com.android.extservices" "com.android.graphics.pdf" "com.android.hardware.biometrics.face.virtual" "com.android.hardware.biometrics.fingerprint.virtual" "com.android.hardware.boot" "com.android.hardware.cas" "com.android.hardware.wifi" "com.android.healthfitness" "com.android.hotspot2.osulogin" "com.android.i18n" "com.android.ipsec" "com.android.media" "com.android.media.swcodec" "com.android.mediaprovider" "com.android.nearby.halfsheet" "com.android.networkstack.tethering" "com.android.neuralnetworks" "com.android.ondevicepersonalization" "com.android.os.statsd" "com.android.permission" "com.android.resolv" "com.android.rkpd" "com.android.runtime" "com.android.safetycenter.resources" "com.android.scheduling" "com.android.sdkext" "com.android.support.apexer" "com.android.telephony" "com.android.telephonymodules" "com.android.tethering" "com.android.tzdata" "com.android.uwb" "com.android.uwb.resources" "com.android.virt" "com.android.vndk.current" "com.android.vndk.current.on_vendor" "com.android.wifi" "com.android.wifi.dialog" "com.android.wifi.resources" "com.google.pixel.camera.hal" "com.google.pixel.vibrator.hal" "com.qorvo.uwb")
+    for apex in "${apex_modules[@]}"; do
+        echo "Generating APEX key: $apex"
         ./development/tools/make_key "$certs_dir/$apex" "$subject"
         openssl pkcs8 -in "$certs_dir/$apex.pk8" -inform DER -nocrypt -out "$certs_dir/$apex.pem"
     done
+
+    print_footer "$certs_dir"
 }
 
-keygen "$1"
+# Ensure the script is executed with the correct permissions
+if [ "$(basename "$0")" == "generate_key.sh" ]; then
+    keygen "$1"
+fi
