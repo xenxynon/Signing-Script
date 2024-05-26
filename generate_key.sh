@@ -40,7 +40,7 @@ function execute_build_signing() {
     if [[ "$response" =~ ^(yes|y|yep|sure|yeah|yup|ok|okay)$ ]]; then
         print_section "Executing Build Signing Script"
         echo "Running build signing script with certificate directory: $certs_dir"
-        ./sign_build.sh "$certs_dir"
+        ./scripts/sign_build.sh "$certs_dir"
         if [ $? -eq 0 ]; then
             echo -e "${GREEN}Build signing completed successfully.${NC}"
         else
