@@ -115,10 +115,8 @@ function keygen() {
 
     # Generate keys for standard certificates
     print_section "Generating Standard Keys"
-    local standard_keys=("bluetooth" "certs" "cyngn-app" "media" "networkstack" "platform" "releasekey" "sdk_sandbox" "shared" "testcert" "testkey" "verity")
-    for key in "${standard_keys[@]}"; do
-        echo "Generating key: $key"
-        ./development/tools/make_key "$certs_dir/$key" "$subject" || exit 1  # Exit if key generation fails
+    for key in bluetooth certs cyngn-app media networkstack platform releasekey sdk_sandbox shared testcert testkey verity; do
+        ./development/tools/make_key "$certs_dir"/$key "$subject"
     done
 
     # Modify make_key script to use 4096 bits instead of 2048 bits
@@ -127,12 +125,11 @@ function keygen() {
 
     # Generate keys for APEX modules
     print_section "Generating APEX Keys"
-    local apex_modules=("com.android.adbd" "com.android.adservices" "com.android.adservices.api" "com.android.appsearch" "com.android.art" "com.android.bluetooth" "com.android.btservices" "com.android.cellbroadcast" "com.android.compos" "com.android.configinfrastructure" "com.android.connectivity.resources" "com.android.conscrypt" "com.android.devicelock" "com.android.extservices" "com.android.graphics.pdf" "com.android.hardware.biometrics.face.virtual" "com.android.hardware.biometrics.fingerprint.virtual" "com.android.hardware.boot" "com.android.hardware.cas" "com.android.hardware.wifi" "com.android.healthfitness" "com.android.hotspot2.osulogin" "com.android.i18n" "com.android.ipsec" "com.android.media" "com.android.media.swcodec" "com.android.mediaprovider" "com.android.nearby.halfsheet" "com.android.networkstack.tethering" "com.android.neuralnetworks" "com.android.ondevicepersonalization" "com.android.os.statsd" "com.android.permission" "com.android.resolv" "com.android.rkpd" "com.android.runtime" "com.android.safetycenter.resources" "com.android.scheduling" "com.android.sdkext" "com.android.support.apexer" "com.android.telephony" "com.android.telephonymodules" "com.android.tethering" "com.android.tzdata" "com.android.uwb.resources" "com.android.virt" "com.android.vndk.current" "com.android.vndk.current.on_vendor" "com.android.wifi" "com.android.wifi.dialog" "com.android.wifi.resources" "com.google.pixel.camera.hal" "com.google.pixel.vibrator.hal" "com.qorvo.uwb")
-    for apex in "${apex_modules[@]}"; do
-        echo "Generating APEX key: $apex"
-        ./development/tools/make_key "$certs_dir/$apex" "$subject" || exit 1  # Exit if key generation fails
-        openssl pkcs8 -in "$certs_dir/$apex.pk8" -inform DER -nocrypt -out "$certs_dir/$apex.pem" || exit 1  # Exit if conversion fails
-    done
+for apex in com.android.adbd com.android.adservices com.android.adservices.api com.android.appsearch com.android.art com.android.bluetooth com.android.btservices com.android.cellbroadcast com.android.compos com.android.configinfrastructure com.android.connectivity.resources com.android.conscrypt com.android.devicelock com.android.extservices com.android.graphics.pdf com.android.hardware.biometrics.face.virtual com.android.hardware.biometrics.fingerprint.virtual com.android.hardware.boot com.android.hardware.cas com.android.hardware.wifi com.android.healthfitness com.android.hotspot2.osulogin com.android.i18n com.android.ipsec com.android.media com.android.media.swcodec com.android.mediaprovider com.android.nearby.halfsheet com.android.networkstack.tethering com.android.neuralnetworks com.android.ondevicepersonalization com.android.os.statsd com.android.permission com.android.resolv com.android.rkpd com.android.runtime com.android.safetycenter.resources com.android.scheduling com.android.sdkext com.android.support.apexer com.android.telephony com.android.telephonymodules com.android.tethering com.android.tzdata com.android.uwb com.android.uwb.resources com.android.virt com.android.vndk.current com.android.vndk.current.on_vendor com.android.wifi com.android.wifi.dialog com.android.wifi.resources com.google.pixel.camera.hal com.google.pixel.vibrator.hal com.qorvo.uwb; do
+    subject='/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN='$apex'/emailAddress=android@android.com'
+    ~/.android-certs/make_key ~/.android-certs/$apex "$subject"
+    openssl pkcs8 -in ~/.android-certs/$apex.pk8 -inform DER -nocrypt -out ~/.android-certs/$apex.pem
+done
 
     print_footer "$certs_dir"
 }
