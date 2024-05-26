@@ -11,7 +11,7 @@ NC='\033[0m' # No Color
 positive_responses="yes|y|yep|sure|yeah|yup|ok|okay"
 negative_responses="no|n|nope|nah|naw"
 
-function print_header() {
+ {
     echo -e "${CYAN}"
     echo "------------------------------------------"
     echo "         ANDROID KEY GENERATOR            "
@@ -31,11 +31,10 @@ function print_footer() {
 function print_section() {
     echo -e "${YELLOW}"
     echo "------------------------------------------"
-    echo "|               $1                        |"
+    echo "|         Generating APEX Keys           |"
     echo "------------------------------------------"
     echo -e "${NC}"
 }
-
 function keygen() {
     local default_certs_dir=~/.android-certs
     local certs_dir=${1:-$default_certs_dir}
@@ -93,13 +92,6 @@ function keygen() {
     echo "----------------------------------------"
     echo "Subject details: $subject"
     echo
-
-    # Generate keys for APEX modules
-    print_section "Generating APEX Keys"
-    gen_apex_keys "$certs_dir" "$subject"
-
-    print_footer "$certs_dir"
-    execute_build_signing "$certs_dir"
 }
 
 function gen_apex_keys() {
@@ -126,14 +118,13 @@ function execute_build_signing() {
         echo -e "${YELLOW}Skipping build signing.${NC}"
     fi
 }
-
+print_header
+keygen
+print_section
+gen_apex_keys "$certs_dir" "$subject"
+print_footer "$certs_dir"
+execute_build_signing "$certs_dir"
 # Ensure the script is executed with the correct permissions
 if [ "$(basename "$0")" == "generate_key.sh" ]; then
-    if [[ "$1" =~ ^--($positive_responses)$ ]]; then
-        keygen "" "yes"  # Pass "yes" as the second argument
-    elif [[ "$1" =~ ^--($negative_responses)$ ]]; then
-        keygen "" "no"  # Pass "no" as the second argument
-    else
-        keygen "$1" "$2"
-    fi
+    keygen "$@"
 fi
