@@ -132,4 +132,12 @@ function keygen() {
 }
 
 # Ensure the script is executed with the correct permissions
-if [
+if [ "$(basename "$0")" == "generate_key.sh" ]; then
+    if [[ "$1" =~ ^--($positive_responses)$ ]]; then
+        keygen "" "yes"  # Pass "yes" as the second argument
+    elif [[ "$1" =~ ^--($negative_responses)$ ]]; then
+        keygen "" "no"  # Pass "no" as the second argument
+    else
+        keygen "$1" "$2"
+    fi
+fi
