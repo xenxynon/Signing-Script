@@ -32,22 +32,8 @@ function print_section() {
     echo -e "${YELLOW}"
     echo "------------------------------------------"
     echo "|               $1                        |"
-    echo "|        Generating APEX Keys             |"
     echo "------------------------------------------"
     echo -e "${NC}"
-}
-
-function execute_build_signing() {
-    local certs_dir=$1
-    echo -e "${YELLOW}Do you want to run the build signing script now? (yes/no): ${NC}"
-    read -r response
-
-    if [[ "$response" =~ ^($positive_responses)$ ]]; then
-        echo -e "${YELLOW}Executing Build Signing Script...${NC}"
-        ./sign_build.sh "$certs_dir"
-    elif [[ "$response" =~ ^($negative_responses)$ ]]; then
-        echo -e "${YELLOW}Skipping build signing.${NC}"
-    fi
 }
 
 function keygen() {
@@ -108,29 +94,37 @@ function keygen() {
     echo "Subject details: $subject"
     echo
 
-    # Generate keys for standard certificates
-    print_section "Generating Standard Keys"
-    local standard_keys=("bluetooth" "certs" "cyngn-app" "media" "networkstack" "platform" "releasekey" "sdk_sandbox" "shared" "testcert" "testkey" "verity")
-    for key in "${standard_keys[@]}"; do
-        echo "Generating key: $key"
-        ./development/tools/make_key "$certs_dir/$key" "$subject"
-    done
-
-    # Modify make_key script to use 4096 bits instead of 2048 bits
-    echo "Updating key length to 4096 bits..."
-    sed -i 's|2048|4096|g' ./development/tools/make_key
-
     # Generate keys for APEX modules
     print_section "Generating APEX Keys"
+    gen_apex_keys "$certs_dir" "$subject"
+
+    print_footer "$certs_dir"
+    execute_build_signing "$certs_dir"
+}
+
+function gen_apex_keys() {
+    local certs_dir=$1
+    local subject=$2
+
     local apex_modules=("com.android.adbd" "com.android.adservices" "com.android.adservices.api" "com.android.appsearch" "com.android.art" "com.android.bluetooth" "com.android.btservices" "com.android.cellbroadcast" "com.android.compos" "com.android.configinfrastructure" "com.android.connectivity.resources" "com.android.conscrypt" "com.android.devicelock" "com.android.extservices" "com.android.graphics.pdf" "com.android.hardware.biometrics.face.virtual" "com.android.hardware.biometrics.fingerprint.virtual" "com.android.hardware.boot" "com.android.hardware.cas" "com.android.hardware.wifi" "com.android.healthfitness" "com.android.hotspot2.osulogin" "com.android.i18n" "com.android.ipsec" "com.android.media" "com.android.media.swcodec" "com.android.mediaprovider" "com.android.nearby.halfsheet" "com.android.networkstack.tethering" "com.android.neuralnetworks" "com.android.ondevicepersonalization" "com.android.os.statsd" "com.android.permission" "com.android.resolv" "com.android.rkpd" "com.android.runtime" "com.android.safetycenter.resources" "com.android.scheduling" "com.android.sdkext" "com.android.support.apexer" "com.android.telephony" "com.android.telephonymodules" "com.android.tethering" "com.android.tzdata" "com.android.uwb" "com.android.uwb.resources" "com.android.virt" "com.android.vndk.current" "com.android.vndk.current.on_vendor" "com.android.wifi" "com.android.wifi.dialog" "com.android.wifi.resources" "com.google.pixel.camera.hal" "com.google.pixel.vibrator.hal" "com.qorvo.uwb")
     for apex in "${apex_modules[@]}"; do
         echo "Generating APEX key: $apex"
         ./development/tools/make_key "$certs_dir/$apex" "$subject"
         openssl pkcs8 -in "$certs_dir/$apex.pk8" -inform DER -nocrypt -out "$certs_dir/$apex.pem"
     done
+}
 
-    print_footer "$certs_dir"
-    execute_build_signing "$certs_dir"
+function execute_build_signing() {
+    local certs_dir=$1
+    echo -e "${YELLOW}Do you want to run the build signing script now? (yes/no): ${NC}"
+    read -r response
+
+    if [[ "$response" =~ ^($positive_responses)$ ]]; then
+        echo -e "${YELLOW}Executing Build Signing Script...${NC}"
+        ./sign_build.sh "$certs_dir"
+    elif [[ "$response" =~ ^($negative_responses)$ ]]; then
+        echo -e "${YELLOW}Skipping build signing.${NC}"
+    fi
 }
 
 # Ensure the script is executed with the correct permissions
