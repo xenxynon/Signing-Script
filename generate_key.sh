@@ -31,6 +31,18 @@ function print_section() {
     echo -e "${NC}"
 }
 
+function execute_build_signing() {
+    local certs_dir=$1
+    print_section "Executing Build Signing Script"
+    echo "Running build signing script with certificate directory: $certs_dir"
+    ./sign_build.sh "$certs_dir"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Build signing completed successfully.${NC}"
+    else
+        echo -e "${RED}Build signing failed.${NC}"
+    fi
+}
+
 function keygen() {
     local default_certs_dir=~/.android-certs
     local certs_dir=${1:-$default_certs_dir}
@@ -111,6 +123,7 @@ function keygen() {
     done
 
     print_footer "$certs_dir"
+    execute_build_signing "$certs_dir"
 }
 
 # Ensure the script is executed with the correct permissions
