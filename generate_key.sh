@@ -34,16 +34,21 @@ function print_section() {
 function keygen() {
     local default_certs_dir=~/.android-certs
     local certs_dir=${1:-$default_certs_dir}
+    local response=$2
 
     print_header
 
-    # Check if certificate directory exists and prompt the user
+    # Check if certificate directory exists and prompt the user if no response is given
     if [ -d "$certs_dir" ]; then
         echo -e "${RED}Warning: Found existing directory for keys: $certs_dir${NC}"
         echo "It is recommended to wipe the existing directory to avoid conflicts."
-        echo -n "Do you want to wipe the existing directory? (yes/no): "
-        read -r response
+        if [ -z "$response" ]; then
+            echo -n "Do you want to wipe the existing directory? (yes/no): "
+            read -r response
+        fi
+
         response=$(echo "$response" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase
+
         if [[ "$response" =~ ^(yes|y|yep|sure|yeah|yup|ok|okay)$ ]]; then
             echo "Cleaning and setting up certificate directory..."
             rm -rf "$certs_dir"
@@ -110,5 +115,9 @@ function keygen() {
 
 # Ensure the script is executed with the correct permissions
 if [ "$(basename "$0")" == "generate_key.sh" ]; then
-    keygen "$1"
+    if [[ "$1" =~ ^--(yes|y|yep|sure|yeah|yup|ok|okay)$ || "$1" =~ ^--(no|n|nope|nah|naw)$ ]]; then
+        keygen "" "${1:2}"  # Remove the leading "--"
+    else
+        keygen "$1"
+    fi
 fi
