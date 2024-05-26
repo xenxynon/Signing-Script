@@ -7,6 +7,10 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Responses
+positive_responses="yes|y|yep|sure|yeah|yup|ok|okay"
+negative_responses="no|n|nope|nah|naw"
+
 function print_header() {
     echo -e "${CYAN}"
     echo "========================================"
@@ -35,22 +39,12 @@ function execute_build_signing() {
     local certs_dir=$1
     echo -e "${YELLOW}Do you want to run the build signing script now? (yes/no): ${NC}"
     read -r response
-    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase
 
-    if [[ "$response" =~ ^(yes|y|yep|sure|yeah|yup|ok|okay)$ ]]; then
-        print_section "Executing Build Signing Script"
-        echo "Running build signing script with certificate directory: $certs_dir"
+    if [[ "$response" =~ ^($positive_responses)$ ]]; then
+        echo -e "${YELLOW}Executing Build Signing Script...${NC}"
         ./sign_build.sh "$certs_dir"
-        if [ $? -eq 0 ]; then
-            echo -e "${GREEN}Build signing completed successfully.${NC}"
-        else
-            echo -e "${RED}Build signing failed.${NC}"
-        fi
-    elif [[ "$response" =~ ^(no|n|nope|nah|naw)$ ]]; then
-        echo -e "${YELLOW}Skipping build signing as per user request.${NC}"
-    else
-        echo -e "${RED}Invalid response. Exiting.${NC}"
-        exit 1
+    elif [[ "$response" =~ ^($negative_responses)$ ]]; then
+        echo -e "${YELLOW}Skipping build signing.${NC}"
     fi
 }
 
@@ -72,12 +66,12 @@ function keygen() {
 
         response=$(echo "$response" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase
 
-        if [[ "$response" =~ ^(yes|y|yep|sure|yeah|yup|ok|okay)$ ]]; then
+        if [[ "$response" =~ ^($positive_responses)$ ]]; then
             echo "Cleaning and setting up certificate directory..."
             rm -rf "$certs_dir"
             mkdir -p "$certs_dir"
             echo "Directory setup at: $certs_dir"
-        elif [[ "$response" =~ ^(no|n|nope|nah|naw)$ ]]; then
+        elif [[ "$response" =~ ^($negative_responses)$ ]]; then
             echo "Keeping existing directory: $certs_dir"
         else
             echo "Invalid response. Exiting."
@@ -138,12 +132,4 @@ function keygen() {
 }
 
 # Ensure the script is executed with the correct permissions
-if [ "$(basename "$0")" == "generate_key.sh" ]; then
-    if [[ "$1" =~ ^--(yes|y|yep|sure|yeah|yup|ok|okay)$ ]]; then
-        keygen "" "${1:2}"  # Remove the leading "--" and pass as "yes"
-    elif [[ "$1" =~ ^--(no|n|nope|nah|naw)$ ]]; then
-        keygen "" "${1:2}"  # Remove the leading "--" and pass as "no"
-    else
-        keygen "$1" "$2"
-    fi
-fi
+if [
