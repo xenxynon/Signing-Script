@@ -115,9 +115,11 @@ function keygen() {
 
 # Ensure the script is executed with the correct permissions
 if [ "$(basename "$0")" == "generate_key.sh" ]; then
-    if [[ "$1" =~ ^--(yes|y|yep|sure|yeah|yup|ok|okay)$ || "$1" =~ ^--(no|n|nope|nah|naw)$ ]]; then
-        keygen "" "${1:2}"  # Remove the leading "--"
+    if [[ "$1" =~ ^--(yes|y|yep|sure|yeah|yup|ok|okay)$ ]]; then
+        keygen "" "${1:2}"  # Remove the leading "--" and pass as "yes"
+    elif [[ "$1" =~ ^--(no|n|nope|nah|naw)$ ]]; then
+        keygen "" "${1:2}"  # Remove the leading "--" and pass as "no"
     else
-        keygen "$1"
+        keygen "$1" "$2"
     fi
 fi
