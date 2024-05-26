@@ -4,6 +4,7 @@
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 function print_header() {
@@ -36,11 +37,29 @@ function keygen() {
 
     print_header
 
-    # Clean and create certificate directory
-    print_section "Setting Up Certificate Directory"
-    rm -rf "$certs_dir"
-    mkdir -p "$certs_dir"
-    echo "Directory setup at: $certs_dir"
+    # Check if certificate directory exists and prompt the user
+    if [ -d "$certs_dir" ]; then
+        echo -e "${RED}Warning: Found existing directory for keys: $certs_dir${NC}"
+        echo "It is recommended to wipe the existing directory to avoid conflicts."
+        echo -n "Do you want to wipe the existing directory? (yes/no): "
+        read -r response
+        response=$(echo "$response" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase
+        if [[ "$response" =~ ^(yes|y|yep|sure|yeah|yup|ok|okay)$ ]]; then
+            echo "Cleaning and setting up certificate directory..."
+            rm -rf "$certs_dir"
+            mkdir -p "$certs_dir"
+            echo "Directory setup at: $certs_dir"
+        elif [[ "$response" =~ ^(no|n|nope|nah|naw)$ ]]; then
+            echo "Keeping existing directory: $certs_dir"
+        else
+            echo "Invalid response. Exiting."
+            exit 1
+        fi
+    else
+        echo "Setting up new certificate directory..."
+        mkdir -p "$certs_dir"
+        echo "Directory setup at: $certs_dir"
+    fi
     echo
 
     local subject=""
