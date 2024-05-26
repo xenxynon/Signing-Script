@@ -1,13 +1,13 @@
 # Generating the keys
-On root directory of your rom, run:
-
+* On root directory of your rom, run:
+```
     croot
     git clone https://github.com/baka-hokage/Signing-Script.git -b master scripts
     bash scripts/generate_key.sh
-
+```
 
 # Generating an install package
-After Generating the keys, instead of running brunch , run the following: 
+* After Generating the keys, instead of running brunch , run the following: 
 
     lunch <codename>
     m target-files-package otatools
@@ -23,10 +23,9 @@ After it’s finished, you just need to sign all the APKs:
         signed-target_files.zip
 
 # For apex signing
-
+* Do check packages existence tho
  ```
-    croot
-
+croot
 sign_target_files_apks -o -d ~/.android-certs \
     --extra_apks AdServicesApk.apk=$HOME/.android-certs/releasekey \
     --extra_apks HalfSheetUX.apk=$HOME/.android-certs/releasekey \
