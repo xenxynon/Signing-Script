@@ -2,7 +2,7 @@
 On root directory of your rom, run:
 
     croot
-    git clone https://github.com/baka-hokage/Signing-Script.git -b master scripts
+    git clone https://github.com/xenxynon/Signing-Script.git -b master scripts
     bash scripts/generate_key.sh
 
 
