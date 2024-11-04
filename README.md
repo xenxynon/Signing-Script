@@ -19,7 +19,7 @@ After it’s finished, you just need to sign all the APKs:
 
     croot 
     sign_target_files_apks -o -d ~/.android-certs \
-        $OUT/obj/PACKAGING/target_files_intermediates/*-target_files-*.zip \
+        $OUT/obj/PACKAGING/target_files_intermediates/*target_files*.zip \
         signed-target_files.zip
 
 
