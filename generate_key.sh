@@ -11,7 +11,7 @@ function keygen() {
         read -r val
         subject+="/$entry=$val"
     done
-    for key in bluetooth certs cyngn-app media networkstack platform releasekey sdk_sandbox shared testcert testkey verity; do
+    for key in bluetooth certs cyngn-app media networkstack nfc platform releasekey sdk_sandbox shared testcert testkey verity; do
         ./development/tools/make_key "$certs_dir"/$key "$subject"
     done
 }
