@@ -42,7 +42,7 @@ read -r certs_dir
 if [ -d "$certs_dir" ]; then
     echo
     echo -e "${YELLOW}⚠ The directory ${BOLD}$certs_dir${RESET}${YELLOW} already exists.${RESET}"
-    
+
     if get_yes_no "${BOLD}${RED}❯ Remove and generate fresh keys? (y/N): ${RESET}"; then
         rm -rf "$certs_dir"
         echo -e "${GREEN}✔ Old keys removed.${RESET}"
@@ -73,13 +73,6 @@ else
 fi
 
 echo
-if get_yes_no "${BOLD}${BLUE}❯ Do you want to set a password for your keys?${RESET} (Recommended: No) (y/N): "; then
-    password_flag=""
-    echo -e "${GREEN}✔ Password will be required for keys.${RESET}"
-else
-    password_flag="-newkeypass ''"
-    echo -e "${YELLOW}⚠ Generating keys without a password.${RESET}"
-fi
 
 echo -e "\n📌 ${BOLD}${CYAN}Generating keys in:${RESET} ${BOLD}$certs_dir${RESET}"
 echo -e "${MAGENTA}──────────────────────────────────────────────${RESET}"
@@ -88,8 +81,8 @@ keys=("bluetooth" "certs" "cyngn-app" "media" "networkstack" "otakey" "nfc" "pla
 
 for key in "${keys[@]}"; do
     echo -en "   ${BOLD}${BLUE}Generating:${RESET} ${BOLD}${YELLOW}$key${RESET}..."
-    ./development/tools/make_key "$certs_dir/$key" "$subject" $password_flag > /dev/null 2>&1
-    echo -e " ${GREEN}✔ Done.${RESET}"
+    echo ""
+    ./development/tools/make_key "$certs_dir/$key" "$subject"
 done
 
 echo -e "${MAGENTA}──────────────────────────────────────────────${RESET}"
