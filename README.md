@@ -4,8 +4,9 @@
 ---
 
 ## How to Use
-### 1. Run the Script
+### 1. Run the Script in your rom directory
 ```sh
+git clone https://github.com/xenxynon/keygen
 ./keygen/keygen.sh
 ```
 
