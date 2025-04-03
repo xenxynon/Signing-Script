@@ -15,7 +15,7 @@ function keygen() {
     local sample_subject="/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=Android/emailAddress=android@android.com"
     local subject=""
 
-    read -p "Use sample subject? (Y/n): " use_sample </dev/tty
+    read -p "Use sample subject ($sample_subject)? (Y/n): " use_sample </dev/tty
     if [[ "$use_sample" =~ ^([Nn])$ ]]; then
         echo "Now enter subject details for your keys:"
         for entry in C ST L O OU CN emailAddress; do
@@ -24,6 +24,7 @@ function keygen() {
         done
     else
         subject="$sample_subject"
+        echo "Using sample subject: $subject"
     fi
 
     for key in bluetooth certs cyngn-app media networkstack otakey nfc platform releasekey sdk_sandbox shared testcert testkey verity; do
