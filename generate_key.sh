@@ -12,14 +12,19 @@ function keygen() {
 
     mkdir -p "$certs_dir"
 
+    local sample_subject="/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=Android/emailAddress=android@android.com"
     local subject=""
-    echo "Sample subject: '/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=Android/emailAddress=android@android.com'"
-    echo "Now enter subject details for your keys:"
 
-    for entry in C ST L O OU CN emailAddress; do
-        read -p "$entry: " val </dev/tty
-        subject+="/$entry=$val"
-    done
+    read -p "Use sample subject? (Y/n): " use_sample </dev/tty
+    if [[ "$use_sample" =~ ^([Nn])$ ]]; then
+        echo "Now enter subject details for your keys:"
+        for entry in C ST L O OU CN emailAddress; do
+            read -p "$entry: " val </dev/tty
+            subject+="/$entry=$val"
+        done
+    else
+        subject="$sample_subject"
+    fi
 
     for key in bluetooth certs cyngn-app media networkstack otakey nfc platform releasekey sdk_sandbox shared testcert testkey verity; do
         ./development/tools/make_key "$certs_dir"/$key "$subject"
